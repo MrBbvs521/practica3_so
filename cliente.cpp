@@ -14,10 +14,10 @@
 using namespace std;
 
 // Constantes de configuración de la red y almacenamiento
-const string SERVER_IP = "127.0.0.1";
+const string SERVER_IP = "127.0.0.1"; // Usar localhost para pruebas en tu WSL/PC
 const int SERVER_PORT = 12345;
-const size_t TAMANO_ESPERADO = 768; // 768 bytes (muestras térmicas)
-const string ARCHIVO_SALIDA = "datos_temperatura.txt";
+const size_t TAMANO_ESPERADO = 768;   // 768 bytes (muestras de temperatura de la cámara)
+const string ARCHIVO_OUTPUT = "datos_temperatura.txt";
 
 // ==============================================================================
 // 1. FUNCIÓN: Crear socket y establecer conexión TCP con el servidor
@@ -66,7 +66,7 @@ bool recibirDatosRed(int socket_fd, vector<uint8_t>& buffer, size_t total_espera
 
     cout << "[CLIENTE] Iniciando ingesta de flujo de datos..." << endl;
 
-    // En TCP, los datos pueden fragmentarse. Debemos iterar con recv() hasta recibir todo.
+    // En TCP los datos pueden fragmentarse. Iteramos con recv() hasta recibir todo de forma íntegra.
     while (total_recibido < total_esperado) {
         ssize_t bytes_leidos = recv(socket_fd, buffer.data() + total_recibido, total_esperado - total_recibido, 0);
         
@@ -95,7 +95,7 @@ bool guardarDatosDisco(const string& ruta_archivo, const vector<uint8_t>& datos)
         return false;
     }
 
-    // Guardar los datos de temperatura secuencialmente
+    // Guardar las lecturas térmicas secuencialmente
     archivo << "=========================================================\n";
     archivo << "   REGISTRO ADQUIRIDO - CÁMARA TÉRMICA INDUSTRIAL\n";
     archivo << "=========================================================\n\n";
@@ -160,11 +160,11 @@ int main() {
     cout << "[CLIENTE] Socket de conexión cerrado." << endl;
 
     // Paso 4: Guardar lecturas en datos_temperatura.txt
-    if (!guardarDatosDisco(ARCHIVO_SALIDA, datos_adquiridos)) {
+    if (!guardarDatosDisco(ARCHIVO_OUTPUT, datos_adquiridos)) {
         return 1;
     }
 
-    // Paso 5: Mostrar analítica en pantalla
+    // Paso 5: Mostrar estadísticas analíticas en pantalla
     mostrarEstadisticasConsola(datos_adquiridos);
 
     return 0;
